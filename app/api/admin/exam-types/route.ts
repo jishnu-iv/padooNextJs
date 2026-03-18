@@ -9,7 +9,7 @@ export async function GET() {
   return NextResponse.json(examTypes);
 }
 
-export async function POST(req: NextRequest) {
+export async function POST( req: NextRequest) {
   try {
     const body = await req.json();
     const { name, hasStages } = body;

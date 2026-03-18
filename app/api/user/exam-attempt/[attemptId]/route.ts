@@ -1,14 +1,17 @@
 import { prisma } from "@/app/lib/prisma";
 import { NextResponse } from "next/server";
 
+// 1. Update the type of params to be a Promise
 export async function GET(
   req: Request,
-  { params }: { params: { attemptId: string } }
+  { params }: { params: Promise<{ attemptId: string }> } 
 ) {
+  // 2. Await the params to extract attemptId
+  const { attemptId } = await params;
 
   const attempt = await prisma.examAttempt.findUnique({
     where: {
-      id: params.attemptId
+      id: attemptId // Use the awaited ID here
     }
   });
 
