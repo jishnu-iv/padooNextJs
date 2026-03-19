@@ -1,6 +1,57 @@
+// import { NextResponse } from "next/server";
+// import bcrypt from "bcryptjs";
+// import { prisma } from "../../../lib/prisma";
+
+// export async function POST(req: Request) {
+//   try {
+//     const body = await req.json();
+//     const { name, email, password } = body;
+
+//     if (!name || !email || !password) {
+//       return NextResponse.json(
+//         { message: "All fields are required" },
+//         { status: 400 }
+//       );
+//     }
+
+//     const existing = await prisma.user.findUnique({
+//       where: { email },
+//     });
+
+//     if (existing) {
+//       return NextResponse.json(
+//         { message: "Email already exists" },
+//         { status: 400 }
+//       );
+//     }
+
+//     const hashedPassword = await bcrypt.hash(password, 10);
+
+//     await prisma.user.create({
+//       data: {
+//         name,
+//         email,
+//         password: hashedPassword,
+//         role: "ADMIN", // 🔥 Important
+//         isVerified: true,
+//       },
+//     });
+
+//     return NextResponse.json(
+//       { message: "Admin registered successfully" },
+//       { status: 201 }
+//     );
+
+//   } catch (error) {
+//     return NextResponse.json(
+//       { message: "Internal server error" },
+//       { status: 500 }
+//     );
+//   }
+// }
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-import { prisma } from "../../../lib/prisma";
+ import { prisma } from "../../../lib/prisma";
 
 export async function POST(req: Request) {
   try {
@@ -27,12 +78,14 @@ export async function POST(req: Request) {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // Prisma automatically handles cuid() for 'id' 
+    // and @default(now()) for 'createdAt'/'updatedAt'
     await prisma.user.create({
       data: {
         name,
         email,
         password: hashedPassword,
-        role: "ADMIN", // 🔥 Important
+        role: "ADMIN",
         isVerified: true,
       },
     });
@@ -42,9 +95,12 @@ export async function POST(req: Request) {
       { status: 201 }
     );
 
-  } catch (error) {
+  } catch (error: any) {
+    // CRITICAL: This allows you to see the real error in Railway Logs
+    console.error("REGISTRATION_FAILURE:", error); 
+    
     return NextResponse.json(
-      { message: "Internal server error" },
+      { message: "Internal server error", error: error.message },
       { status: 500 }
     );
   }
